@@ -1,44 +1,36 @@
 const mongoose = require("mongoose");
-// Recall how exports work in Node.js?
+const shortid = require('shortid');
 const UrlSchema = require('./url.schema').UrlSchema;
 
 const UrlModel = mongoose.model("Url", UrlSchema);
 
 function addUrl(url) {
+    if (url.shortUrl === null) {
+        url.shortUrl = shortid.generate()
+    }
     return UrlModel.create(url);
 }
 
-function findBrandedUrl(brandedUrl) {
-    return UrlModel.exists({brandedUrl: brandedUrl}).exec();
+function findByShortUrl(shortUrl) {
+    return UrlModel.findOne({shortUrl: shortUrl}).exec();
 }
 
-function findByBrandedUrl(brandedUrl) {
-    return UrlModel.findOne({brandedUrl: brandedUrl}).exec();
+function findByOriginUrl(originUrl) {
+    return UrlModel.findOne({originUrl: originUrl}).exec();  
 }
 
-function findByUnbrandedUrl(unbrandedUrl) {
-    return UrlModel.findOne({unbrandedUrl: unbrandedUrl}).exec();
-    
+function deleteByShortUrl(shortUrl) {
+    return UrlModel.deleteOne({shortUrl: shortUrl}).exec();
 }
 
-function findByShortUrl(url) {
-    if (findBrandedUrl(url)) {
-        return findByBrandedUrl(url);
-    }
-    return findByUnbrandedUrl(url);
+function updateOriginUrl(shortUrl, originUrl) {
+    return UrlModel.findOneAndUpdate({shortUrl: shortUrl}, {originUrl: originUrl}, {new: true}).exec();
 }
 
-function getAllUrl() {
-    return UrlModel.find().exec();
-}
-
-
-// Make sure to export a function after you create it!
 module.exports = {
     addUrl,
-    findBrandedUrl,
-    findByBrandedUrl,
-    findByUnbrandedUrl,
     findByShortUrl,
-    getAllUrl,
+    findByOriginUrl,
+    deleteByShortUrl,
+    updateOriginUrl,
 };
